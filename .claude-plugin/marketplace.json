@@ -1,0 +1,16 @@
+{
+  "name": "deltaXinc-plugins",
+  "owner": {
+    "name": "deltaXinc"
+  },
+  "metadata": {
+    "description": "Claude Code plugins by deltaXinc"
+  },
+  "plugins": [
+    {
+      "name": "tech-blog-writing",
+      "source": "./",
+      "description": "Write tech blog articles grounded in real project history by researching GitHub issues, codebase git history, and Notion meeting notes."
+    }
+  ]
+}

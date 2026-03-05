@@ -9,14 +9,11 @@ A Claude Code plugin that writes tech blog articles grounded in real project his
 
 ## Installation
 
-```
-/tech-blog-writing:tech-blog <topic description>
-```
+Add the marketplace and install the plugin:
 
-Or for local development/testing:
-
-```bash
-claude --plugin-dir /path/to/tech-blog-writing
+```
+/plugin marketplace add deltaXinc/tech-blog-writing
+/plugin install tech-blog-writing@deltaXinc-plugins
 ```
 
 ### Notion Setup (optional)
@@ -60,7 +57,8 @@ The plugin will:
 ```
 tech-blog-writing/
 ├── .claude-plugin/
-│   └── plugin.json                     # Plugin metadata
+│   ├── plugin.json                     # Plugin metadata
+│   └── marketplace.json                # Self-contained marketplace catalog
 ├── .mcp.json                           # Bundled Notion MCP server
 ├── agents/
 │   ├── research-github.md              # GitHub issues/PRs researcher (subagent)
