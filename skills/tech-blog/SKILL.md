@@ -3,7 +3,7 @@ name: tech-blog
 description: Write tech blog articles grounded in real project history by researching GitHub issues, codebase git history, and Notion meeting notes.
 argument-hint: "[topic description]"
 disable-model-invocation: true
-allowed-tools: Bash(gh *), Bash(git log *), Bash(git diff *), Bash(git show *), Bash(gh auth status), Read, Write, Glob, Grep, Agent, mcp__notion__notion-search, mcp__notion__notion-fetch
+allowed-tools: Bash(gh *), Bash(git log *), Bash(git diff *), Bash(git show *), Read, Write, Glob, Grep, Agent, mcp__notion__notion-search, mcp__notion__notion-fetch
 ---
 
 # Tech Blog Article Writer
@@ -79,11 +79,14 @@ Delegate to the `tech-blog-writing:research-notion` subagent. Pass:
 - Key search terms (both Japanese and English)
 - Date range
 
-**IMPORTANT**: Launch all applicable subagents simultaneously for maximum efficiency.
+**CRITICAL RULES FOR PHASE 2**:
+- Launch all applicable subagents simultaneously for maximum efficiency.
+- All subagents MUST run in the **foreground** (NOT background). You must wait for each subagent to return its full results before moving to Phase 3.
+- Prefere to rely on subagents rather than making researches yourself, unless subagents did not give you enough feedback.
 
 ## Phase 3: Report Assembly
 
-After all subagents complete:
+After all subagents have completed and returned their results:
 
 1. Save each research report to temporary files:
    - `/tmp/tech-blog-research-github.md`
