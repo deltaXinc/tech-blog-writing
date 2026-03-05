@@ -11,7 +11,7 @@ This is the default writing style guide for the tech-blog-writing plugin. It pro
 ## Structure
 
 ### Title
-- Clear and specific (e.g., "BatchWaveの設計と進化 — 大規模バッチ処理基盤の3年間")
+- Clear and specific (e.g., "問い合わせフォームを「データ」で作る ── 塾選FormHubの設計と運用")
 - Avoid vague titles; the reader should know what they'll learn
 
 ### Header Image / Emoji

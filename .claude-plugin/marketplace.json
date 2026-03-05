@@ -10,7 +10,7 @@
     {
       "name": "tech-blog-writing",
       "source": "./",
-      "description": "Write tech blog articles grounded in real project history by researching GitHub issues, codebase git history, and Notion meeting notes."
+      "description": "GitHub Issue/PR、gitコミット履歴、Notion議事録をリサーチし、日本語のテックブログ記事を生成するプラグイン"
     }
   ]
 }
