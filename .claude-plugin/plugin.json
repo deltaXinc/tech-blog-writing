@@ -1,6 +1,12 @@
 {
   "name": "tech-blog-writing",
   "description": "Write tech blog articles grounded in real project history by researching GitHub issues, codebase git history, and Notion meeting notes.",
-  "author": "deltaXinc",
-  "version": "0.1.0"
+  "version": "0.2.0",
+  "author": {
+    "name": "deltaXinc",
+    "url": "https://github.com/deltaXinc"
+  },
+  "repository": "https://github.com/deltaXinc/tech-blog-writing",
+  "license": "MIT",
+  "keywords": ["tech-blog", "writing", "research", "github", "notion"]
 }

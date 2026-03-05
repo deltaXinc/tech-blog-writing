@@ -5,7 +5,7 @@ A Claude Code plugin that writes tech blog articles grounded in real project his
 ## Requirements
 
 - [GitHub CLI](https://cli.github.com/) (`gh`) — used to search issues, PRs, and comments
-- [Notion MCP server](https://github.com/makenotion/notion-mcp-server) (optional) — for meeting notes, specs, and internal docs
+- [Notion](https://www.notion.so/) integration token (optional) — set `NOTION_TOKEN` env var to enable Notion research. The plugin bundles the Notion MCP server automatically.
 
 ## Installation
 
@@ -20,9 +20,23 @@ cd ~/Projects/tech-blog-writing && ./install.sh
 The install script:
 1. Installs and authenticates `gh` if not already set up
 2. Adds the plugin to `~/.claude/settings.json` (enabledPlugins)
-3. Adds required tool permissions (gh, git, Notion MCP) to the allow list
 
 After installation, restart Claude Code for the plugin to take effect.
+
+### Notion Setup (optional)
+
+To enable Notion research:
+
+1. Go to https://www.notion.so/profile/integrations and create a new internal integration
+2. In the integration's Configuration tab, copy the secret token (`ntn_****`)
+3. In the Access tab, connect the pages/databases you want the plugin to search
+4. Set the token as an environment variable before launching Claude Code:
+
+```bash
+export NOTION_TOKEN="ntn_****"
+```
+
+The plugin bundles the Notion MCP server via `.mcp.json` — no additional MCP configuration needed. If `NOTION_TOKEN` is not set, the plugin skips Notion research gracefully.
 
 ## Usage
 
@@ -45,84 +59,60 @@ The plugin will:
 5. **Write** a full article draft in Japanese following the style guidelines
 6. **Iterate** based on your feedback until you're satisfied
 
+## Plugin Structure
+
+```
+tech-blog-writing/
+├── .claude-plugin/
+│   └── plugin.json                     # Plugin metadata
+├── .mcp.json                           # Bundled Notion MCP server
+├── agents/
+│   ├── research-github.md              # GitHub issues/PRs researcher (subagent)
+│   ├── research-codebase.md            # Git history & code researcher (subagent)
+│   └── research-notion.md              # Notion pages researcher (subagent)
+├── skills/
+│   └── tech-blog/
+│       ├── SKILL.md                    # Orchestrator (5-phase workflow)
+│       └── guidelines/
+│           └── default-style.md        # Default writing style
+├── install.sh
+├── README.md
+└── LICENSE
+```
+
+### Plugin Features Used
+
+| Feature | Purpose |
+|---------|---------|
+| `skills/` | Main orchestrator skill (`/tech-blog-writing:tech-blog`) |
+| `agents/` | 3 specialized research subagents with restricted tool access |
+| `.mcp.json` | Bundled Notion MCP server — users just set `NOTION_TOKEN` |
+| `install.sh` | Registers plugin, sets up gh CLI |
+
+### Research Subagents
+
+| Subagent | Sources | Tools |
+|----------|---------|-------|
+| `research-github` | Issues, PRs, comments, discussions | Bash, Read, Grep |
+| `research-codebase` | Git history, code files | Bash, Read, Glob, Grep |
+| `research-notion` | Meeting notes, specs, decisions | notion-search, notion-fetch, Read |
+
+Each subagent returns a structured chronological report in Japanese. The orchestrator assembles these into the final article.
+
 ## Configuration
 
 ### Custom Style Guidelines
 
-When asked during setup, provide the path to your custom guidelines markdown file. The default style (`guidelines/default-style.md`) produces articles suitable for Zenn, Qiita, or company tech blogs:
+When asked during setup, provide the path to your custom guidelines markdown file. The default style produces articles suitable for Zenn, Qiita, or company tech blogs:
 
 - Zenn-compatible frontmatter
 - Japanese language with natural English technical terms
 - Chronological or thematic structure
 - 3,000-6,000 character target length
 
-## How It Works
-
-```
-/tech-blog-writing:tech-blog (orchestrator)
-    |
-    +-- [parallel] GitHub Agent    -> gh search issues/prs, gh api comments
-    +-- [parallel] Codebase Agent  -> git log, git diff, git show, file reading
-    +-- [parallel] Notion Agent    -> notion-search, notion-fetch (if available)
-    |
-    v
-Research Reports (saved to /tmp/)
-    |
-    v
-Article Draft (written to your specified location)
-```
-
-### Plugin Structure
-
-```
-tech-blog-writing/
-├── .claude-plugin/
-│   └── plugin.json
-├── skills/
-│   └── tech-blog/
-│       ├── SKILL.md                   # Orchestrator (5-phase workflow)
-│       ├── agents/
-│       │   ├── research-github.md     # GitHub issues/PRs researcher
-│       │   ├── research-codebase.md   # Git history & code researcher
-│       │   └── research-notion.md     # Notion pages researcher
-│       └── guidelines/
-│           └── default-style.md       # Default writing style
-├── install.sh
-├── README.md
-└── LICENSE
-```
-
-### Research Agents
-
-| Agent | Sources | Tools Used |
-|-------|---------|------------|
-| GitHub | Issues, PRs, comments, discussions | `gh search`, `gh api` |
-| Codebase | Git history, code files | `git log`, `git diff`, `git show`, Read, Glob, Grep |
-| Notion | Meeting notes, specs, decisions | `notion-search`, `notion-fetch` |
-
-Each agent returns a structured chronological report in Japanese. The orchestrator assembles these into the final article.
-
 ## Permissions
 
-The install script adds these permissions to your Claude Code settings:
-
-```json
-{
-  "permissions": {
-    "allow": [
-      "Bash(gh issue:*)",
-      "Bash(gh pr:*)",
-      "Bash(gh api:*)",
-      "Bash(gh search:*)",
-      "Bash(git log:*)",
-      "Bash(git diff:*)",
-      "Bash(git show:*)",
-      "mcp__notion__notion-search",
-      "mcp__notion__notion-fetch"
-    ]
-  }
-}
-```
+Tool permissions (gh, git, Notion MCP) are declared in the skill's `allowed-tools` frontmatter — no global permission changes needed. The plugin only modifies `enabledPlugins` in your settings.
 
 ## License
 

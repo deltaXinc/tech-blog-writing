@@ -7,29 +7,30 @@ SETTINGS_FILE="$HOME/.claude/settings.json"
 echo "Installing tech-blog-writing plugin..."
 echo ""
 
-# --- Check gh CLI ---
+# --- Setup gh CLI ---
 if ! command -v gh &>/dev/null; then
-  echo "ERROR: GitHub CLI (gh) is not installed."
-  echo ""
-  echo "  Install:  brew install gh"
-  echo "  Login:    gh auth login"
-  echo ""
-  exit 1
+  echo "  gh CLI: Not found. Installing..."
+  if command -v brew &>/dev/null; then
+    brew install gh
+  else
+    echo "ERROR: Homebrew is not installed. Install gh manually: https://cli.github.com/"
+    exit 1
+  fi
 fi
 
 if ! gh auth status &>/dev/null 2>&1; then
-  echo "ERROR: GitHub CLI is installed but not authenticated."
-  echo ""
-  echo "  Run:  gh auth login"
-  echo ""
-  exit 1
+  echo "  gh CLI: Not authenticated. Running gh auth login..."
+  gh auth login
 fi
 
 echo "  gh CLI: OK"
 
-# --- Check Notion MCP ---
-# We can't check MCP availability from outside Claude Code, just inform the user
-echo "  Notion MCP: Will be checked at runtime (optional)"
+# --- Notion MCP ---
+if [ -n "${NOTION_TOKEN:-}" ]; then
+  echo "  Notion: NOTION_TOKEN is set — Notion MCP will be available"
+else
+  echo "  Notion: NOTION_TOKEN not set — set it to enable Notion research (optional)"
+fi
 
 # --- Update settings.json ---
 if [ ! -f "$SETTINGS_FILE" ]; then
@@ -37,7 +38,6 @@ if [ ! -f "$SETTINGS_FILE" ]; then
   echo '{}' > "$SETTINGS_FILE"
 fi
 
-# Use a temporary file for jq operations
 TMP_SETTINGS=$(mktemp)
 
 # Add plugin to enabledPlugins (object format: {"path": true})
@@ -45,25 +45,8 @@ jq --arg plugin "$PLUGIN_DIR" '
   .enabledPlugins = ((.enabledPlugins // {}) | .[$plugin] = true)
 ' "$SETTINGS_FILE" > "$TMP_SETTINGS" && mv "$TMP_SETTINGS" "$SETTINGS_FILE"
 
-# Add permissions
-PERMISSIONS=(
-  'Bash(gh issue:*)'
-  'Bash(gh pr:*)'
-  'Bash(gh api:*)'
-  'Bash(gh search:*)'
-  'Bash(git log:*)'
-  'Bash(git diff:*)'
-  'Bash(git show:*)'
-  'mcp__notion__notion-search'
-  'mcp__notion__notion-fetch'
-)
-
-for perm in "${PERMISSIONS[@]}"; do
-  TMP_SETTINGS=$(mktemp)
-  jq --arg perm "$perm" '
-    .permissions.allow = ((.permissions.allow // []) | if index($perm) then . else . + [$perm] end)
-  ' "$SETTINGS_FILE" > "$TMP_SETTINGS" && mv "$TMP_SETTINGS" "$SETTINGS_FILE"
-done
+# Note: Tool permissions (gh, git, notion) are handled by the skill's
+# allowed-tools frontmatter — no need to modify global permissions.
 
 echo ""
 echo "Plugin installed successfully!"
@@ -71,5 +54,5 @@ echo ""
 echo "  Plugin path: $PLUGIN_DIR"
 echo "  Settings updated: $SETTINGS_FILE"
 echo ""
-echo "Restart Claude Code, then use:  /tech-blog <topic>"
+echo "Restart Claude Code, then use:  /tech-blog-writing:tech-blog <topic>"
 echo ""

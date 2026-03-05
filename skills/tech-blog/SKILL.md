@@ -3,6 +3,7 @@ name: tech-blog
 description: Write tech blog articles grounded in real project history by researching GitHub issues, codebase git history, and Notion meeting notes.
 argument-hint: "[topic description]"
 disable-model-invocation: true
+allowed-tools: Bash(gh *), Bash(git log *), Bash(git diff *), Bash(git show *), Bash(gh auth status), Read, Write, Glob, Grep, Agent, mcp__notion__notion-search, mcp__notion__notion-fetch
 ---
 
 # Tech Blog Article Writer
@@ -24,7 +25,7 @@ Install:  brew install gh
 Login:    gh auth login
 
 The tech-blog plugin uses GitHub issues, PRs, and comments as primary research sources.
-Re-run /tech-blog after setup.
+Re-run /tech-blog-writing:tech-blog after setup.
 ```
 
 ### Step 2: Check Notion MCP (OPTIONAL)
@@ -36,8 +37,8 @@ If NOT available, output:
 ```
 Notion MCP is not configured. Proceeding without Notion research.
 
-For richer articles, set up the Notion MCP server to include meeting notes,
-specs, and internal documentation. See README for setup instructions.
+To enable Notion research, set the NOTION_TOKEN environment variable and restart Claude Code.
+The plugin bundles the Notion MCP server automatically.
 ```
 
 ### Step 3: Gather Parameters
@@ -48,41 +49,41 @@ Then ask the user interactively for the following:
 - **Target repository** (org/repo format, e.g. `deltaXinc/bestjuku.com`)
 - **Date range** (optional, default: all time)
 - **Key search terms, people, or branches** relevant to the topic
-- **Custom style guidelines file** (optional, default: built-in `guidelines/default-style.md`)
+- **Custom style guidelines file** (optional, default: built-in)
 
 Wait for the user's answers before proceeding to Phase 2.
 
 ## Phase 2: Parallel Research
 
-Launch 2-3 research agents in parallel using the Agent tool. Each agent returns structured findings as text (NOT files). Pass the gathered parameters (repo, date range, search terms, topic) to each agent.
+Launch 2-3 research subagents in parallel. Each subagent returns structured findings as text (NOT files). Pass the gathered parameters (repo, date range, search terms, topic) to each subagent.
 
-### Agent 1: GitHub Research
+### Subagent 1: GitHub Research
 
-Read the agent prompt from `${CLAUDE_SKILL_DIR}/agents/research-github.md` and use it to launch the agent. Pass:
+Delegate to the `tech-blog-writing:research-github` subagent. Pass:
 - Repository (org/repo)
 - Topic description
 - Key search terms and people
 - Date range
 
-### Agent 2: Codebase Research
+### Subagent 2: Codebase Research
 
-Read the agent prompt from `${CLAUDE_SKILL_DIR}/agents/research-codebase.md` and use it to launch the agent. Pass:
+Delegate to the `tech-blog-writing:research-codebase` subagent. Pass:
 - Topic description
 - Key search terms, branches, file paths
 - Date range
 
-### Agent 3: Notion Research (only if Notion MCP is available)
+### Subagent 3: Notion Research (only if Notion MCP is available)
 
-Read the agent prompt from `${CLAUDE_SKILL_DIR}/agents/research-notion.md` and use it to launch the agent. Pass:
+Delegate to the `tech-blog-writing:research-notion` subagent. Pass:
 - Topic description
 - Key search terms (both Japanese and English)
 - Date range
 
-**IMPORTANT**: Launch all applicable agents simultaneously for maximum efficiency.
+**IMPORTANT**: Launch all applicable subagents simultaneously for maximum efficiency.
 
 ## Phase 3: Report Assembly
 
-After all agents complete:
+After all subagents complete:
 
 1. Save each research report to temporary files:
    - `/tmp/tech-blog-research-github.md`
