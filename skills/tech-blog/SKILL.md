@@ -1,3 +1,10 @@
+---
+name: tech-blog
+description: Write tech blog articles grounded in real project history by researching GitHub issues, codebase git history, and Notion meeting notes.
+argument-hint: "[topic description]"
+disable-model-invocation: true
+---
+
 # Tech Blog Article Writer
 
 You are a tech blog article writing orchestrator. You research real project history across GitHub, codebase, and Notion, then synthesize findings into a well-structured Japanese tech blog article.
@@ -51,7 +58,7 @@ Launch 2-3 research agents in parallel using the Agent tool. Each agent returns 
 
 ### Agent 1: GitHub Research
 
-Use the `agents/research-github.md` prompt. Pass:
+Read the agent prompt from `${CLAUDE_SKILL_DIR}/agents/research-github.md` and use it to launch the agent. Pass:
 - Repository (org/repo)
 - Topic description
 - Key search terms and people
@@ -59,14 +66,14 @@ Use the `agents/research-github.md` prompt. Pass:
 
 ### Agent 2: Codebase Research
 
-Use the `agents/research-codebase.md` prompt. Pass:
+Read the agent prompt from `${CLAUDE_SKILL_DIR}/agents/research-codebase.md` and use it to launch the agent. Pass:
 - Topic description
 - Key search terms, branches, file paths
 - Date range
 
 ### Agent 3: Notion Research (only if Notion MCP is available)
 
-Use the `agents/research-notion.md` prompt. Pass:
+Read the agent prompt from `${CLAUDE_SKILL_DIR}/agents/research-notion.md` and use it to launch the agent. Pass:
 - Topic description
 - Key search terms (both Japanese and English)
 - Date range
@@ -98,7 +105,7 @@ Wait for the user's input before proceeding.
 
 ## Phase 4: Article Writing
 
-1. Read the writing guidelines file. Default: read the file `guidelines/default-style.md` from the plugin directory. If the user specified a custom file, read that instead.
+1. Read the writing guidelines file. Default: read `${CLAUDE_SKILL_DIR}/guidelines/default-style.md`. If the user specified a custom file, read that instead.
 
 2. Read all research reports from `/tmp/tech-blog-research-*.md`.
 

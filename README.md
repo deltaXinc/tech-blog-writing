@@ -2,22 +2,10 @@
 
 A Claude Code plugin that writes tech blog articles grounded in real project history. It researches GitHub issues, codebase git history, and Notion meeting notes, then synthesizes findings into a well-structured Japanese tech blog article.
 
-## Prerequisites
+## Requirements
 
-### Required: GitHub CLI
-
-```bash
-brew install gh
-gh auth login
-```
-
-The plugin uses `gh` to search issues, PRs, and comments as primary research sources. It will fail fast with a clear error if `gh` is not configured.
-
-### Optional: Notion MCP
-
-For richer articles that include meeting notes, specs, and internal documentation, configure the [Notion MCP server](https://github.com/makenotion/notion-mcp-server) in your Claude Code settings.
-
-The plugin works without Notion but will skip that research stream and note it in the final summary.
+- [GitHub CLI](https://cli.github.com/) (`gh`) — used to search issues, PRs, and comments
+- [Notion MCP server](https://github.com/makenotion/notion-mcp-server) (optional) — for meeting notes, specs, and internal docs
 
 ## Installation
 
@@ -30,23 +18,22 @@ cd ~/Projects/tech-blog-writing && ./install.sh
 ```
 
 The install script:
-1. Adds the plugin to `~/.claude/settings.json` (enabledPlugins)
-2. Adds required tool permissions (gh, git, notion MCP) to the allow list
-3. Validates that `gh` is installed and authenticated
-4. Reports Notion MCP availability
+1. Installs and authenticates `gh` if not already set up
+2. Adds the plugin to `~/.claude/settings.json` (enabledPlugins)
+3. Adds required tool permissions (gh, git, Notion MCP) to the allow list
 
 After installation, restart Claude Code for the plugin to take effect.
 
 ## Usage
 
 ```
-/tech-blog <topic description>
+/tech-blog-writing:tech-blog <topic description>
 ```
 
 ### Example
 
 ```
-/tech-blog BatchWave: the evolution of our batch processing infrastructure
+/tech-blog-writing:tech-blog BatchWave: the evolution of our batch processing infrastructure
 ```
 
 The plugin will:
@@ -62,17 +49,7 @@ The plugin will:
 
 ### Custom Style Guidelines
 
-You can provide your own writing style guidelines file instead of the built-in default:
-
-```
-/tech-blog <topic>
-```
-
-When asked during setup, provide the path to your custom guidelines markdown file.
-
-### Default Style
-
-The built-in style (`guidelines/default-style.md`) produces articles suitable for Zenn, Qiita, or company tech blogs. It includes:
+When asked during setup, provide the path to your custom guidelines markdown file. The default style (`guidelines/default-style.md`) produces articles suitable for Zenn, Qiita, or company tech blogs:
 
 - Zenn-compatible frontmatter
 - Japanese language with natural English technical terms
@@ -81,10 +58,8 @@ The built-in style (`guidelines/default-style.md`) produces articles suitable fo
 
 ## How It Works
 
-### Architecture
-
 ```
-/tech-blog (orchestrator)
+/tech-blog-writing:tech-blog (orchestrator)
     |
     +-- [parallel] GitHub Agent    -> gh search issues/prs, gh api comments
     +-- [parallel] Codebase Agent  -> git log, git diff, git show, file reading
@@ -95,6 +70,26 @@ Research Reports (saved to /tmp/)
     |
     v
 Article Draft (written to your specified location)
+```
+
+### Plugin Structure
+
+```
+tech-blog-writing/
+├── .claude-plugin/
+│   └── plugin.json
+├── skills/
+│   └── tech-blog/
+│       ├── SKILL.md                   # Orchestrator (5-phase workflow)
+│       ├── agents/
+│       │   ├── research-github.md     # GitHub issues/PRs researcher
+│       │   ├── research-codebase.md   # Git history & code researcher
+│       │   └── research-notion.md     # Notion pages researcher
+│       └── guidelines/
+│           └── default-style.md       # Default writing style
+├── install.sh
+├── README.md
+└── LICENSE
 ```
 
 ### Research Agents

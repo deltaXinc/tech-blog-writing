@@ -40,9 +40,9 @@ fi
 # Use a temporary file for jq operations
 TMP_SETTINGS=$(mktemp)
 
-# Add plugin to enabledPlugins
+# Add plugin to enabledPlugins (object format: {"path": true})
 jq --arg plugin "$PLUGIN_DIR" '
-  .enabledPlugins = ((.enabledPlugins // []) | if index($plugin) then . else . + [$plugin] end)
+  .enabledPlugins = ((.enabledPlugins // {}) | .[$plugin] = true)
 ' "$SETTINGS_FILE" > "$TMP_SETTINGS" && mv "$TMP_SETTINGS" "$SETTINGS_FILE"
 
 # Add permissions
