@@ -4,24 +4,20 @@ A Claude Code plugin that writes tech blog articles grounded in real project his
 
 ## Requirements
 
-- [GitHub CLI](https://cli.github.com/) (`gh`) — used to search issues, PRs, and comments
+- [GitHub CLI](https://cli.github.com/) (`gh`) — used to search issues, PRs, and comments. The plugin checks for `gh` at startup and provides install instructions if missing.
 - [Notion](https://www.notion.so/) integration token (optional) — set `NOTION_TOKEN` env var to enable Notion research. The plugin bundles the Notion MCP server automatically.
 
 ## Installation
 
-```bash
-# Clone the repo
-git clone https://github.com/deltaXinc/tech-blog-writing.git ~/Projects/tech-blog-writing
-
-# Run the install script
-cd ~/Projects/tech-blog-writing && ./install.sh
+```
+/tech-blog-writing:tech-blog <topic description>
 ```
 
-The install script:
-1. Installs and authenticates `gh` if not already set up
-2. Adds the plugin to `~/.claude/settings.json` (enabledPlugins)
+Or for local development/testing:
 
-After installation, restart Claude Code for the plugin to take effect.
+```bash
+claude --plugin-dir /path/to/tech-blog-writing
+```
 
 ### Notion Setup (optional)
 
@@ -75,7 +71,6 @@ tech-blog-writing/
 │       ├── SKILL.md                    # Orchestrator (5-phase workflow)
 │       └── guidelines/
 │           └── default-style.md        # Default writing style
-├── install.sh
 ├── README.md
 └── LICENSE
 ```
@@ -87,7 +82,6 @@ tech-blog-writing/
 | `skills/` | Main orchestrator skill (`/tech-blog-writing:tech-blog`) |
 | `agents/` | 3 specialized research subagents with restricted tool access |
 | `.mcp.json` | Bundled Notion MCP server — users just set `NOTION_TOKEN` |
-| `install.sh` | Registers plugin, sets up gh CLI |
 
 ### Research Subagents
 
@@ -112,7 +106,7 @@ When asked during setup, provide the path to your custom guidelines markdown fil
 
 ## Permissions
 
-Tool permissions (gh, git, Notion MCP) are declared in the skill's `allowed-tools` frontmatter — no global permission changes needed. The plugin only modifies `enabledPlugins` in your settings.
+Tool permissions (gh, git, Notion MCP) are declared in the skill's `allowed-tools` frontmatter — no global permission changes needed.
 
 ## License
 
